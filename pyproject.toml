@@ -8,3 +8,8 @@ dependencies = [
 
 [tool.uv.sources]
 tinygrad = { path = "tinygrad", editable = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
