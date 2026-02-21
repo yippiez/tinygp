@@ -16,6 +16,7 @@ tinygrad = { path = "tinygrad", editable = true }
 
 [dependency-groups]
 dev = [
+    "gplearn>=0.4.3",
     "pytest>=9.0.2",
 ]
 
