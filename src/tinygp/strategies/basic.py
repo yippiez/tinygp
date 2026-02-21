@@ -6,6 +6,26 @@ from tinygrad.tinygrad import UOp, dtypes
 from tinygrad.tinygrad.uop import Ops
 
 
+UNARY_PRIMITIVES: tuple[Ops, ...] = (
+    Ops.NEG,
+    Ops.SIN,
+    Ops.LOG2,
+    Ops.EXP2,
+    Ops.SQRT,
+    Ops.RECIPROCAL,
+    Ops.TRUNC,
+)
+
+BINARY_PRIMITIVES: tuple[Ops, ...] = (
+    Ops.ADD,
+    Ops.SUB,
+    Ops.MUL,
+    Ops.MAX,
+    Ops.FDIV,
+    Ops.POW,
+)
+
+
 @dataclass(frozen=True)
 class BasicStrategyState:
     generation: int
@@ -56,7 +76,9 @@ class BasicStrategy:
         self.const_max = const_max
         self.maximize = maximize
         self._rng = random.Random(seed)
-        self._var_x = UOp.variable("x", const_min, const_max, dtype=dtypes.int)
+        self._var_x = UOp.variable("x", float(const_min), float(const_max), dtype=dtypes.float)
+        self._unary_ops = UNARY_PRIMITIVES
+        self._binary_ops = BINARY_PRIMITIVES
 
     def ask(self, state: BasicStrategyState | None) -> tuple[list[UOp], BasicStrategyState]:
         """Return the current population to evaluate.
@@ -71,15 +93,20 @@ class BasicStrategy:
             AssertionError: If ``ask`` is called twice in a row without ``tell``.
         """
         if state is None:
-            population = tuple(self._random_tree(self.max_depth) for _ in range(self.population_size))
+            seeds = self._primitive_seed_programs()
+            assert self.population_size >= len(seeds), "population_size must be >= primitive seed count for first-generation coverage"
+            population = list(seeds)
+            while len(population) < self.population_size:
+                population.append(self._random_tree(self.max_depth))
+            self._rng.shuffle(population)
             next_state = BasicStrategyState(
                 generation=0,
                 phase="asked",
-                population=population,
+                population=tuple(population),
                 best_program=None,
                 best_fitness=None,
             )
-            return list(population), next_state
+            return population, next_state
 
         assert state.phase == "ready", "ask called twice in a row; call tell after ask"
 
@@ -158,19 +185,41 @@ class BasicStrategy:
         if depth <= 0 or self._rng.random() < 0.35:
             return self._random_terminal()
 
-        if self._rng.random() < 0.2:
+        if self._rng.random() < 0.3:
             child = self._random_tree(depth - 1)
-            return UOp(Ops.NEG, dtypes.int, (child,))
+            op = self._rng.choice(self._unary_ops)
+            return UOp(op, dtypes.float, (child,))
 
         lhs = self._random_tree(depth - 1)
         rhs = self._random_tree(depth - 1)
-        op = self._rng.choice((Ops.ADD, Ops.SUB, Ops.MUL, Ops.MAX))
-        return UOp(op, dtypes.int, (lhs, rhs))
+        op = self._rng.choice(self._binary_ops)
+        return UOp(op, dtypes.float, (lhs, rhs))
 
     def _random_terminal(self) -> UOp:
         if self._rng.random() < 0.5:
             return self._var_x
-        return UOp.const(dtypes.int, self._rng.randint(self.const_min, self.const_max))
+        return UOp.const(dtypes.float, self._rng.uniform(float(self.const_min), float(self.const_max)))
+
+    def _primitive_seed_programs(self) -> list[UOp]:
+        programs: list[UOp] = [
+            self._var_x,
+            UOp.const(dtypes.float, 1.0),
+            UOp.const(dtypes.float, -1.0),
+        ]
+
+        for op in self._unary_ops:
+            programs.append(UOp(op, dtypes.float, (self._var_x,)))
+
+        for op in self._binary_ops:
+            if op is Ops.FDIV:
+                rhs = UOp.const(dtypes.float, 0.5)
+            elif op is Ops.POW:
+                rhs = UOp.const(dtypes.float, 2.0)
+            else:
+                rhs = UOp.const(dtypes.float, 1.5)
+            programs.append(UOp(op, dtypes.float, (self._var_x, rhs)))
+
+        return programs
 
     def _mutate(self, tree: UOp) -> UOp:
         target = self._rng.choice(_collect_nodes(tree))
