@@ -30,6 +30,7 @@ class GplearnGP(BasicStrategy):
         const_max: int = 8,
         seed: int | None = None,
         maximize: bool = True,
+        simplify_every_n: int = 0,
         tournament_size: int = 20,
         p_subtree_mutation: float | None = None,
         p_hoist_mutation: float | None = None,
@@ -48,6 +49,7 @@ class GplearnGP(BasicStrategy):
             const_max=const_max,
             seed=seed,
             maximize=maximize,
+            simplify_every_n=simplify_every_n,
         )
 
         assert tournament_size > 0, "tournament_size must be greater than zero"
@@ -115,14 +117,22 @@ class GplearnGP(BasicStrategy):
             return population, next_state
 
         assert state.phase == "ready", "ask called twice in a row; call tell after ask"
+
+        population = state.population
+        best_program = state.best_program
+        if self._should_simplify_population(state.generation):
+            population = self._simplify_population(state.population)
+            if state.best_program is not None:
+                best_program = self._safe_simplify(state.best_program)
+
         next_state = BasicStrategyState(
             generation=state.generation,
             phase="asked",
-            population=state.population,
-            best_program=state.best_program,
+            population=population,
+            best_program=best_program,
             best_fitness=state.best_fitness,
         )
-        return list(state.population), next_state
+        return list(population), next_state
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:
         """Update strategy state from fitness evaluations.

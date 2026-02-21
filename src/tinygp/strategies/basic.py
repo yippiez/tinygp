@@ -53,19 +53,15 @@ class BasicStrategy:
         const_max: int = 8,
         seed: int | None = None,
         maximize: bool = True,
+        simplify_every_n: int = 0,
     ) -> None:
-        if population_size <= 0:
-            raise ValueError("population_size must be > 0")
-        if to_k <= 0 or to_k > population_size:
-            raise ValueError("to_k must be in [1, population_size]")
-        if not 0.0 <= mutation_rate <= 1.0:
-            raise ValueError("mutation_rate must be in [0, 1]")
-        if not 0.0 <= crossover_rate <= 1.0:
-            raise ValueError("crossover_rate must be in [0, 1]")
-        if max_depth < 1:
-            raise ValueError("max_depth must be >= 1")
-        if const_min > const_max:
-            raise ValueError("const_min must be <= const_max")
+        assert population_size > 0, "population_size must be > 0"
+        assert 0 < to_k <= population_size, "to_k must be in [1, population_size]"
+        assert 0.0 <= mutation_rate <= 1.0, "mutation_rate must be in [0, 1]"
+        assert 0.0 <= crossover_rate <= 1.0, "crossover_rate must be in [0, 1]"
+        assert max_depth >= 1, "max_depth must be >= 1"
+        assert const_min <= const_max, "const_min must be <= const_max"
+        assert simplify_every_n >= 0, "simplify_every_n must be >= 0"
 
         self.population_size = population_size
         self.to_k = to_k
@@ -75,6 +71,7 @@ class BasicStrategy:
         self.const_min = const_min
         self.const_max = const_max
         self.maximize = maximize
+        self.simplify_every_n = simplify_every_n
         self._rng = random.Random(seed)
         self._var_x = UOp.variable("x", float(const_min), float(const_max), dtype=dtypes.float)
         self._unary_ops = UNARY_PRIMITIVES
@@ -110,14 +107,21 @@ class BasicStrategy:
 
         assert state.phase == "ready", "ask called twice in a row; call tell after ask"
 
+        population = state.population
+        best_program = state.best_program
+        if self._should_simplify_population(state.generation):
+            population = self._simplify_population(state.population)
+            if state.best_program is not None:
+                best_program = self._safe_simplify(state.best_program)
+
         next_state = BasicStrategyState(
             generation=state.generation,
             phase="asked",
-            population=state.population,
-            best_program=state.best_program,
+            population=population,
+            best_program=best_program,
             best_fitness=state.best_fitness,
         )
-        return list(state.population), next_state
+        return list(population), next_state
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:
         """Update the strategy using fitness values from the last population.
@@ -226,6 +230,20 @@ class BasicStrategy:
         replacement_depth = min(self.max_depth, max(1, _tree_depth(target)))
         replacement = self._random_tree(replacement_depth)
         return _replace_subtree(tree, target, replacement)
+
+    def _should_simplify_population(self, generation: int) -> bool:
+        if self.simplify_every_n <= 0:
+            return False
+        return generation > 0 and generation % self.simplify_every_n == 0
+
+    def _safe_simplify(self, program: UOp) -> UOp:
+        try:
+            return program.simplify()
+        except Exception:
+            return program
+
+    def _simplify_population(self, population: tuple[UOp, ...]) -> tuple[UOp, ...]:
+        return tuple(self._safe_simplify(program) for program in population)
 
     def _crossover(self, left: UOp, right: UOp) -> UOp:
         left_target = self._rng.choice(_collect_nodes(left))

@@ -21,6 +21,29 @@ def mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(np.mean(np.abs(sanitize(y_true) - sanitize(y_pred))))
 
 
+def strategy_kwargs_for(strategy_name: str, simplify_every_n: int = 0) -> dict:
+    kwargs: dict = {}
+    if simplify_every_n > 0:
+        kwargs["simplify_every_n"] = simplify_every_n
+
+    if strategy_name == "GplearnGP":
+        kwargs.update(
+            {
+                "const_min": -2,
+                "const_max": 2,
+                "max_depth": 6,
+                "tournament_size": 20,
+                "p_subtree_mutation": 0.05,
+                "p_hoist_mutation": 0.05,
+                "p_point_mutation": 0.05,
+                "p_point_replace": 0.1,
+                "parsimony_coefficient": 0.0,
+            }
+        )
+
+    return kwargs
+
+
 def run_strategy(strategy_cls, x_train: np.ndarray, y_train: np.ndarray, generations: int, strategy_kwargs: dict | None = None):
     init_kwargs = {
         "population_size": 256,
@@ -99,19 +122,7 @@ def compare_on_target(name: str, target_fn, generations: int = 40) -> None:
     strategy_rows = []
     for strategy_name in strategy_names:
         strategy_cls = STRATEGY_REGISTRY[strategy_name]
-        strategy_kwargs: dict | None = None
-        if strategy_name == "GplearnGP":
-            strategy_kwargs = {
-                "const_min": -2,
-                "const_max": 2,
-                "max_depth": 6,
-                "tournament_size": 20,
-                "p_subtree_mutation": 0.05,
-                "p_hoist_mutation": 0.05,
-                "p_point_mutation": 0.05,
-                "p_point_replace": 0.1,
-                "parsimony_coefficient": 0.0,
-            }
+        strategy_kwargs = strategy_kwargs_for(strategy_name, simplify_every_n=0)
         program, expr, train_mse, iter_sec = run_strategy(
             strategy_cls,
             x_train,
@@ -152,9 +163,84 @@ def compare_on_target(name: str, target_fn, generations: int = 40) -> None:
     print()
 
 
+def compare_simplified_vs_unsimplified(generations: int = 5, simplify_every_n: int = 1) -> None:
+    strategy_names = ["BasicStrategy"] + sorted(key for key in STRATEGY_REGISTRY if key != "BasicStrategy")
+    targets = [
+        ("nguyen_1", nguyen_1),
+        ("keijzer_1", keijzer_1),
+    ]
+
+    print(f"simplify comparison: generations={generations}, simplify_every_n={simplify_every_n}")
+    print("method                 base_avg_mse  simp_avg_mse  delta_mse    base_iter   simp_iter   simp_vs_base")
+
+    rows = []
+    for strategy_name in strategy_names:
+        strategy_cls = STRATEGY_REGISTRY[strategy_name]
+        base_mse: list[float] = []
+        simp_mse: list[float] = []
+        base_iter: list[float] = []
+        simp_iter: list[float] = []
+
+        for _, target_fn in targets:
+            x_train = np.linspace(-1.0, 1.0, 128)
+            x_test = np.linspace(-1.0, 1.0, 256)
+            y_train = target_fn(x_train)
+            y_test = target_fn(x_test)
+
+            base_program, _, _, base_iter_sec = run_strategy(
+                strategy_cls,
+                x_train,
+                y_train,
+                generations,
+                strategy_kwargs=strategy_kwargs_for(strategy_name, simplify_every_n=0),
+            )
+            simp_program, _, _, simp_iter_sec = run_strategy(
+                strategy_cls,
+                x_train,
+                y_train,
+                generations,
+                strategy_kwargs=strategy_kwargs_for(strategy_name, simplify_every_n=simplify_every_n),
+            )
+
+            base_mse.append(mse(y_test, eval_uop(base_program, x_test)))
+            simp_mse.append(mse(y_test, eval_uop(simp_program, x_test)))
+            base_iter.append(base_iter_sec)
+            simp_iter.append(simp_iter_sec)
+
+        base_avg_mse = float(np.mean(base_mse))
+        simp_avg_mse = float(np.mean(simp_mse))
+        base_avg_iter = float(np.mean(base_iter))
+        simp_avg_iter = float(np.mean(simp_iter))
+        speed_ratio = base_avg_iter / simp_avg_iter if simp_avg_iter > 0.0 else float("inf")
+        rows.append((strategy_name, base_avg_mse, simp_avg_mse, simp_avg_mse - base_avg_mse, base_avg_iter, simp_avg_iter, speed_ratio))
+
+    rows.sort(key=lambda r: (r[2], r[5]))
+    for row in rows:
+        strategy_name, base_avg_mse, simp_avg_mse, delta_mse, base_avg_iter, simp_avg_iter, speed_ratio = row
+        print(
+            f"{strategy_name:20s} {base_avg_mse:12.6f}  {simp_avg_mse:12.6f}  {delta_mse:10.6f}  "
+            f"{base_avg_iter:10.5f}  {simp_avg_iter:10.5f}  {speed_ratio:10.3f}"
+        )
+
+    gpl_mse: list[float] = []
+    gpl_iter: list[float] = []
+    for _, target_fn in targets:
+        x_train = np.linspace(-1.0, 1.0, 128)
+        y_train = target_fn(x_train)
+        x_test = np.linspace(-1.0, 1.0, 256)
+        y_test = target_fn(x_test)
+        model, _, _, iter_sec = run_gplearn(x_train, y_train, generations)
+        gpl_mse.append(mse(y_test, model.predict(x_test.reshape(-1, 1))))
+        gpl_iter.append(iter_sec)
+
+    print(f"gplearn reference      {float(np.mean(gpl_mse)):12.6f}  {'-':>12s}  {'-':>10s}  {float(np.mean(gpl_iter)):10.5f}")
+    print()
+
+
 def main() -> None:
     compare_on_target("nguyen_1", nguyen_1)
     compare_on_target("keijzer_1", keijzer_1)
+    compare_simplified_vs_unsimplified(generations=5, simplify_every_n=1)
 
 
 if __name__ == "__main__":

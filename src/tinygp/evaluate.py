@@ -66,6 +66,10 @@ def render_uop(node) -> str:
 
     if op_name == "CONST":
         value = float(node.arg)
+        if not np.isfinite(value):
+            if np.isnan(value):
+                return "nan"
+            return "inf" if value > 0 else "-inf"
         rounded = round(value)
         if abs(value - rounded) < 1e-9:
             return str(int(rounded))
