@@ -68,7 +68,7 @@ class BasicStrategy:
             A tuple containing the population list and the updated state.
 
         Raises:
-            ValueError: If ``ask`` is called twice in a row without ``tell``.
+            AssertionError: If ``ask`` is called twice in a row without ``tell``.
         """
         if state is None:
             population = tuple(self._random_tree(self.max_depth) for _ in range(self.population_size))
@@ -81,8 +81,7 @@ class BasicStrategy:
             )
             return list(population), next_state
 
-        if state.phase != "ready":
-            raise ValueError("ask called twice in a row; call tell after ask")
+        assert state.phase == "ready", "ask called twice in a row; call tell after ask"
 
         next_state = BasicStrategyState(
             generation=state.generation,
@@ -104,14 +103,12 @@ class BasicStrategy:
             Updated state containing next generation population and best-so-far.
 
         Raises:
-            ValueError: If call order is invalid or fitness length mismatches population size.
+            AssertionError: If call order is invalid or fitness length mismatches population size.
         """
-        if state.phase != "asked":
-            raise ValueError("tell called before ask")
+        assert state.phase == "asked", "tell called before ask"
 
         scores = np.asarray(fitness, dtype=float).reshape(-1)
-        if scores.shape[0] != self.population_size:
-            raise ValueError("fitness length must match population_size")
+        assert scores.shape[0] == self.population_size, "fitness length must match population_size"
 
         normalized = np.nan_to_num(
             scores,
