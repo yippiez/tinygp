@@ -1,33 +1,8 @@
 import numpy as np
 
 from tinygp.benchmark import keijzer_1, nguyen_1
+from tinygp.evaluate import eval_uop
 from tinygp.strategies import BasicStrategy
-
-
-def eval_uop(node, x: np.ndarray) -> np.ndarray:
-    op_name = node.op.name
-
-    if op_name == "CONST":
-        return np.full_like(x, float(node.arg), dtype=np.float64)
-    if op_name == "DEFINE_VAR":
-        return x
-
-    if op_name == "NEG":
-        return -eval_uop(node.src[0], x)
-
-    left = eval_uop(node.src[0], x)
-    right = eval_uop(node.src[1], x)
-
-    if op_name == "ADD":
-        return left + right
-    if op_name == "SUB":
-        return left - right
-    if op_name == "MUL":
-        return left * right
-    if op_name == "MAX":
-        return np.maximum(left, right)
-
-    raise ValueError(f"unsupported op in example evaluator: {node.op}")
 
 
 def evolve_target(name: str, target_fn, x: np.ndarray, generations: int = 60) -> None:

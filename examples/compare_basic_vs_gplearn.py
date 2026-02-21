@@ -4,32 +4,8 @@ import numpy as np
 from gplearn.genetic import SymbolicRegressor
 
 from tinygp.benchmark import keijzer_1, nguyen_1
+from tinygp.evaluate import eval_uop
 from tinygp.strategies import BasicStrategy
-
-
-def eval_uop(node, x: np.ndarray) -> np.ndarray:
-    op_name = node.op.name
-
-    if op_name == "CONST":
-        return np.full_like(x, float(node.arg), dtype=np.float64)
-    if op_name == "DEFINE_VAR":
-        return x
-    if op_name == "NEG":
-        return -eval_uop(node.src[0], x)
-
-    left = eval_uop(node.src[0], x)
-    right = eval_uop(node.src[1], x)
-
-    if op_name == "ADD":
-        return left + right
-    if op_name == "SUB":
-        return left - right
-    if op_name == "MUL":
-        return left * right
-    if op_name == "MAX":
-        return np.maximum(left, right)
-
-    raise ValueError(f"unsupported op in example evaluator: {node.op}")
 
 
 def sanitize(values: np.ndarray) -> np.ndarray:
@@ -44,7 +20,7 @@ def mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(np.mean(np.abs(sanitize(y_true) - sanitize(y_pred))))
 
 
-def run_basic(x_train: np.ndarray, y_train: np.ndarray, generations: int) -> dict[str, float | str | object]:
+def run_basic(x_train: np.ndarray, y_train: np.ndarray, generations: int):
     strategy = BasicStrategy(
         population_size=256,
         to_k=32,
@@ -70,15 +46,15 @@ def run_basic(x_train: np.ndarray, y_train: np.ndarray, generations: int) -> dic
     assert state.best_program is not None, "best program must be tracked in state"
     assert state.best_fitness is not None, "best fitness must be tracked in state"
 
-    return {
-        "program": state.best_program,
-        "expr": state.best_program.simplify().render(),
-        "train_mse": float(-state.best_fitness),
-        "iter_sec": float(np.mean(iteration_times)),
-    }
+    return (
+        state.best_program,
+        state.best_program.simplify().render(),
+        float(-state.best_fitness),
+        float(np.mean(iteration_times)),
+    )
 
 
-def run_gplearn(x_train: np.ndarray, y_train: np.ndarray, generations: int) -> dict[str, float | str | object]:
+def run_gplearn(x_train: np.ndarray, y_train: np.ndarray, generations: int):
     model = SymbolicRegressor(
         population_size=256,
         generations=generations,
@@ -100,12 +76,7 @@ def run_gplearn(x_train: np.ndarray, y_train: np.ndarray, generations: int) -> d
     total_time = time.perf_counter() - start
     train_pred = model.predict(x_train.reshape(-1, 1))
 
-    return {
-        "model": model,
-        "expr": str(model._program),
-        "train_mse": mse(y_train, train_pred),
-        "iter_sec": total_time / generations,
-    }
+    return model, str(model._program), mse(y_train, train_pred), total_time / generations
 
 
 def compare_on_target(name: str, target_fn, generations: int = 40) -> None:
@@ -114,11 +85,11 @@ def compare_on_target(name: str, target_fn, generations: int = 40) -> None:
     y_train = target_fn(x_train)
     y_test = target_fn(x_test)
 
-    basic = run_basic(x_train, y_train, generations)
-    gpl = run_gplearn(x_train, y_train, generations)
+    basic_program, basic_expr, basic_train_mse, basic_iter_sec = run_basic(x_train, y_train, generations)
+    gpl_model, gpl_expr, gpl_train_mse, gpl_iter_sec = run_gplearn(x_train, y_train, generations)
 
-    basic_test_pred = eval_uop(basic["program"], x_test)
-    gpl_test_pred = gpl["model"].predict(x_test.reshape(-1, 1))
+    basic_test_pred = eval_uop(basic_program, x_test)
+    gpl_test_pred = gpl_model.predict(x_test.reshape(-1, 1))
 
     basic_test_mse = mse(y_test, basic_test_pred)
     gpl_test_mse = mse(y_test, gpl_test_pred)
@@ -128,13 +99,13 @@ def compare_on_target(name: str, target_fn, generations: int = 40) -> None:
     print(f"benchmark: {name}")
     print("method     train_mse    test_mse     test_mae     iter_sec")
     print(
-        f"basic      {basic['train_mse']:10.6f}  {basic_test_mse:10.6f}  {basic_test_mae:10.6f}  {basic['iter_sec']:9.5f}"
+        f"basic      {basic_train_mse:10.6f}  {basic_test_mse:10.6f}  {basic_test_mae:10.6f}  {basic_iter_sec:9.5f}"
     )
     print(
-        f"gplearn    {gpl['train_mse']:10.6f}  {gpl_test_mse:10.6f}  {gpl_test_mae:10.6f}  {gpl['iter_sec']:9.5f}"
+        f"gplearn    {gpl_train_mse:10.6f}  {gpl_test_mse:10.6f}  {gpl_test_mae:10.6f}  {gpl_iter_sec:9.5f}"
     )
-    print(f"basic expr: {basic['expr']}")
-    print(f"gplearn expr: {gpl['expr']}")
+    print(f"basic expr: {basic_expr}")
+    print(f"gplearn expr: {gpl_expr}")
     print()
 
 
