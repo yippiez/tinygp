@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class CR_FM_NES(BasicStrategy):
-    """CR_FM_NES evolutionary strategy for GP populations.
+    """Covariance-Restricted Fast Moving NES.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample candidates from a Gaussian search distribution.
+    - Compute utility-weighted statistics from ranked fitness.
+    - Update mean, global scale, and a restricted covariance parameterization via natural-gradient style rules.
+    - Resample from the updated distribution.
+
+    Intuition:
+        CR-FM-NES approximates full covariance adaptation with faster updates, preserving much of NES directionality at reduced cost.
     """
 
     def __init__(self, *args, **kwargs):

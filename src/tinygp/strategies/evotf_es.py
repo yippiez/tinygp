@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class EvoTF_ES(BasicStrategy):
-    """EvoTF_ES evolutionary strategy for GP populations.
+    """Transformer-informed evolutionary strategy.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Encode recent population statistics and fitness trajectories.
+    - Use a learned sequence model to predict update coefficients or search directions.
+    - Apply predicted updates to the current search center/distribution.
+    - Sample and evaluate the next generation.
+
+    Intuition:
+        Sequence modeling of optimization history allows non-Markovian update behavior beyond classical one-step ES rules.
     """
 
     def __init__(self, *args, **kwargs):

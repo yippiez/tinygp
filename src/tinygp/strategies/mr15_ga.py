@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class MR15_GA(BasicStrategy):
-    """MR15_GA evolutionary strategy for GP populations.
+    """Mutation-rate-15 style genetic algorithm.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Keep elites from the current generation.
+    - Produce offspring through crossover and mutation under an MR15-inspired mutation schedule.
+    - Replace the population with selected survivors and offspring.
+    - Preserve global best solution.
+
+    Intuition:
+        A fixed, empirically tuned mutation regime offers a simple exploitation/exploration balance without heavy adaptation machinery.
     """
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:

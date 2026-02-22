@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class GradientlessDescent(BasicStrategy):
-    """GradientlessDescent evolutionary strategy for GP populations.
+    """Coordinate-free descent with randomized local probes.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Keep a current incumbent solution.
+    - Generate nearby candidates through random structural perturbations.
+    - Accept improvements (or top-ranked local moves) and discard regressions.
+    - Repeat local probing around the updated incumbent.
+
+    Intuition:
+        This is hill descent without analytic gradients: progress comes from repeated local sampling and greedy acceptance.
     """
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:

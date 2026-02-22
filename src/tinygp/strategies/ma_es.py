@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class MA_ES(BasicStrategy):
-    """MA_ES evolutionary strategy for GP populations.
+    """Matrix Adaptation Evolution Strategy.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample offspring from a Gaussian search distribution.
+    - Rank candidates and form weighted recombination of successful steps.
+    - Update mean and adaptation matrix to follow successful covariance structure.
+    - Continue sampling from the adapted distribution.
+
+    Intuition:
+        MA-ES learns correlations between successful moves, rotating and scaling the search distribution toward productive directions.
     """
 
     def __init__(self, *args, **kwargs):

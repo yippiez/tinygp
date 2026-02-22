@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class ESMC(BasicStrategy):
-    """ESMC evolutionary strategy for GP populations.
+    """Evolution strategy with Monte Carlo gradient aggregation.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample perturbation-based population around current anchors.
+    - Evaluate fitness and estimate update direction from Monte Carlo statistics.
+    - Apply scaled update to the search center, possibly with momentum.
+    - Resample around the new center.
+
+    Intuition:
+        ESMC treats ES updates as Monte Carlo estimators, using population averages to obtain stable gradient-free steps.
     """
 
     def __init__(self, *args, **kwargs):

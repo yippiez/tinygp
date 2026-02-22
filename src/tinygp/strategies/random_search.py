@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class RandomSearch(BasicStrategy):
-    """RandomSearch evolutionary strategy for GP populations.
+    """Uniform random search baseline.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Draw a fresh population of random candidate programs each generation.
+    - Evaluate all candidates and keep the best score seen so far.
+    - Optionally retain a small elite set for reporting.
+    - Repeat with newly sampled candidates.
+
+    Intuition:
+        No model is learned; performance comes purely from coverage of the search space and chance discovery.
     """
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:

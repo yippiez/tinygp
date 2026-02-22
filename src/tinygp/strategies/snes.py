@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class SNES(BasicStrategy):
-    """SNES evolutionary strategy for GP populations.
+    """Separable Natural Evolution Strategies.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample candidates from a factorized Gaussian distribution.
+    - Convert fitness values to utilities and estimate natural gradients for mean and per-dimension scale.
+    - Apply natural-gradient updates to distribution parameters.
+    - Resample from the updated separable Gaussian.
+
+    Intuition:
+        Natural-gradient updates account for distribution geometry, giving stable adaptation with cheap diagonal parameterization.
     """
 
     def __init__(self, *args, **kwargs):

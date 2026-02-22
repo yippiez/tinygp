@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class ASEBO(BasicStrategy):
-    """ASEBO evolutionary strategy for GP populations.
+    """Adaptive ES-Active Subspaces optimizer.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Rank evaluated candidates and keep top-k elites.
+    - Build an active subspace from the strongest elites, using it as a low-dimensional search basis.
+    - Seed survivors, then sample parents from that subspace and apply crossover/mutation to generate offspring.
+    - Maintain a global best solution over time.
+
+    Intuition:
+        ASEBO spends most search effort in directions that recently produced gains, reducing variance in uninformative directions while preserving stochastic exploration.
     """
 
     def __init__(self, *args, **kwargs):

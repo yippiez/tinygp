@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class CMA_ES(BasicStrategy):
-    """CMA_ES evolutionary strategy for GP populations.
+    """Covariance Matrix Adaptation Evolution Strategy.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Draw offspring from a multivariate Gaussian centered at current mean.
+    - Rank candidates and recombine elites to update the mean.
+    - Update evolution paths, global step size, and full covariance matrix.
+    - Sample the next generation from the adapted Gaussian.
+
+    Intuition:
+        CMA-ES learns second-order structure of successful moves, giving strong invariance and performance on ill-conditioned landscapes.
     """
 
     def __init__(self, *args, **kwargs):

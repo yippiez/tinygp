@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class NoiseReuseES(BasicStrategy):
-    """NoiseReuseES evolutionary strategy for GP populations.
+    """Evolution strategy with perturbation reuse.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample a bank of noise directions and evaluate perturbed candidates.
+    - Reuse selected directions across multiple generations instead of resampling all noise.
+    - Weight reused directions by observed fitness utility.
+    - Update the search center and refresh part of the noise bank.
+
+    Intuition:
+        Reusing informative perturbations lowers estimator variance and amortizes sampling cost when objective landscapes are noisy.
     """
 
     def __init__(self, *args, **kwargs):

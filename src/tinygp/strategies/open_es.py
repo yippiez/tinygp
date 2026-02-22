@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class Open_ES(BasicStrategy):
-    """Open_ES evolutionary strategy for GP populations.
+    """OpenAI-ES style score-function evolution strategy.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample perturbations around current anchors to form a population.
+    - Evaluate fitness and rank or normalize returns.
+    - Estimate a search direction from perturbation-fitness correlations.
+    - Update the sampling center and regenerate candidates around the new center.
+
+    Intuition:
+        OpenES uses finite-difference-like gradient estimates in parameter space, giving scalable black-box optimization with simple population statistics.
     """
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:

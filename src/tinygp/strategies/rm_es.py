@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class Rm_ES(BasicStrategy):
-    """Rm_ES evolutionary strategy for GP populations.
+    """Rank-mu evolution strategy.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample population from a parameterized search distribution.
+    - Rank individuals and compute weighted recombination over top performers.
+    - Update center using rank-based utilities and adapt mutation scale.
+    - Resample around the updated center.
+
+    Intuition:
+        Rank-based weighting reduces sensitivity to raw fitness scaling while preserving directional signal from strong candidates.
     """
 
     def __init__(self, *args, **kwargs):

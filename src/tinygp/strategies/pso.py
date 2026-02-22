@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class PSO(BasicStrategy):
-    """PSO evolutionary strategy for GP populations.
+    """Particle Swarm Optimization in program parameter space.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Maintain particles with position and velocity.
+    - Update velocity using inertia, personal-best attraction, and global-best attraction.
+    - Move particles and evaluate new positions.
+    - Refresh personal/global best memories.
+
+    Intuition:
+        PSO mixes momentum and social learning, allowing coordinated exploration with low per-particle complexity.
     """
 
     def __init__(self, *args, **kwargs):

@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class SAMR_GA(BasicStrategy):
-    """SAMR_GA evolutionary strategy for GP populations.
+    """Self-Adaptive Mutation Rate genetic algorithm.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Rank population by fitness and keep elites.
+    - Update mutation rate online from recent progress signals.
+    - Refill the population by selecting elite parents and applying crossover plus the adapted mutation strength.
+    - Carry the best-so-far individual forward across generations.
+
+    Intuition:
+        The mutation rate is treated as a control variable: increase exploration when progress stalls and reduce noise when exploitation is working.
     """
 
     def __init__(self, *args, **kwargs):

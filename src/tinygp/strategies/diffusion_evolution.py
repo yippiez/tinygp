@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class DiffusionEvolution(BasicStrategy):
-    """DiffusionEvolution evolutionary strategy for GP populations.
+    """Diffusion-inspired evolutionary search.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Select elites from the current population.
+    - Create offspring by repeatedly perturbing elite structures with noise-scaled mutation and occasional crossover.
+    - Use iterative denoising-style refinement across generations by keeping high-fitness samples and resampling around them.
+    - Preserve the best-so-far program.
+
+    Intuition:
+        Repeated noisy refinement around strong candidates mimics diffusion denoising: broad exploration early, then concentrated sampling around promising modes.
     """
 
     def __init__(self, *args, **kwargs):

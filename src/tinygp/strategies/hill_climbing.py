@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class HillClimbing(BasicStrategy):
-    """HillClimbing evolutionary strategy for GP populations.
+    """Greedy stochastic hill climbing.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Start from a candidate and sample local mutations.
+    - Accept a mutation only if it improves objective value.
+    - Use the accepted candidate as the new current state.
+    - Repeat while tracking the best seen candidate.
+
+    Intuition:
+        Hill climbing performs deterministic exploitation of local improvements with minimal algorithmic overhead.
     """
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:

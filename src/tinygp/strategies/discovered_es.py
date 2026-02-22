@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class DiscoveredES(BasicStrategy):
-    """DiscoveredES evolutionary strategy for GP populations.
+    """Learned update-rule evolution strategy.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Evaluate a population of perturbations around current anchors.
+    - Compute summary statistics of fitness and perturbation outcomes.
+    - Apply a discovered (hand-designed or learned) update transform to produce the next search step.
+    - Generate the next population from updated anchors.
+
+    Intuition:
+        Instead of fixed ES formulas, the optimizer follows an update rule tuned to perform well across tasks.
     """
 
     def __init__(self, *args, **kwargs):

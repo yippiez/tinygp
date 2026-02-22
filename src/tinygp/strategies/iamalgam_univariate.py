@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class iAMaLGaM_Univariate(BasicStrategy):
-    """iAMaLGaM_Univariate evolutionary strategy for GP populations.
+    """Univariate iAMaLGaM distribution-learning optimizer.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Model each parameter dimension with an independent Gaussian.
+    - Select elites and update mean/variance from elite statistics.
+    - Apply anticipated mean shift and adaptive variance scaling to control progress.
+    - Sample the next population from updated univariate marginals.
+
+    Intuition:
+        iAMaLGaM couples elite distribution learning with explicit anticipation, yielding adaptive yet inexpensive search dynamics.
     """
 
     def __init__(self, *args, **kwargs):

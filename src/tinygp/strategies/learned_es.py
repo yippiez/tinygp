@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class LearnedES(BasicStrategy):
-    """LearnedES evolutionary strategy for GP populations.
+    """Evolution strategy driven by a learned optimizer.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Collect perturbation-fitness data from the current population.
+    - Build feature summaries of search dynamics.
+    - Feed summaries to a learned update rule that proposes parameter-space moves.
+    - Generate the next population from updated anchors.
+
+    Intuition:
+        A meta-learned update can encode cross-task priors that outperform fixed handcrafted ES updates on matching task families.
     """
 
     def __init__(self, *args, **kwargs):

@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class DifferentialEvolution(BasicStrategy):
-    """DifferentialEvolution evolutionary strategy for GP populations.
+    """Differential Evolution with recombination-based trial vectors.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - For each target individual, sample distinct peers and build a mutant via scaled difference vectors.
+    - Recombine target and mutant to form a trial candidate.
+    - Evaluate and keep the better of target vs trial.
+    - Repeat for the full population each generation.
+
+    Intuition:
+        Difference vectors provide self-scaling search directions derived directly from population geometry.
     """
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:

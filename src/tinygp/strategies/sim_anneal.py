@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class SimAnneal(BasicStrategy):
-    """SimAnneal evolutionary strategy for GP populations.
+    """Simulated annealing over program space.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Keep a current state and propose a local mutation each step.
+    - Accept improvements always; accept regressions with probability exp(-delta/T).
+    - Decrease temperature T according to an annealing schedule.
+    - Retain the best state encountered.
+
+    Intuition:
+        High temperature enables escape from local minima early; cooling gradually shifts behavior toward greedy refinement.
     """
 
     def __init__(self, *args, **kwargs):

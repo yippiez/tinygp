@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class ARS(BasicStrategy):
-    """ARS evolutionary strategy for GP populations.
+    """Augmented Random Search.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample symmetric perturbation directions around current anchors.
+    - Evaluate positive/negative perturbations and compute directional score differences.
+    - Aggregate top directions into an update step with normalized scaling.
+    - Move anchors and repeat.
+
+    Intuition:
+        ARS estimates a robust descent direction from paired finite differences, often with strong performance-to-complexity tradeoffs.
     """
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:

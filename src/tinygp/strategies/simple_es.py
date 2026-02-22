@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class SimpleES(BasicStrategy):
-    """SimpleES evolutionary strategy for GP populations.
+    """Minimal (mu, lambda)-style evolution strategy.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Keep top mu elites from the evaluated population.
+    - Produce lambda offspring from elites via mutation and optional crossover.
+    - Form the next generation from offspring plus optional survivors.
+    - Track the global best across generations.
+
+    Intuition:
+        SimpleES is a lightweight selection-and-variation loop that emphasizes reliability and low overhead.
     """
 
     def __init__(self, *args, **kwargs):

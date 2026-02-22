@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class GESMR_GA(BasicStrategy):
-    """GESMR_GA evolutionary strategy for GP populations.
+    """GA with guided exploration and self-adaptive mutation rate.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Select elites by fitness.
+    - Estimate exploration pressure from recent diversity/progress statistics.
+    - Adapt mutation rate accordingly and generate offspring from elite parents.
+    - Keep best-so-far and iterate.
+
+    Intuition:
+        GESMR balances exploitation and diversity by coupling parent quality with an online mutation-rate controller.
     """
 
     def __init__(self, *args, **kwargs):

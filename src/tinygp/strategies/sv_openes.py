@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class SV_OpenES(BasicStrategy):
-    """SV_OpenES evolutionary strategy for GP populations.
+    """Safe-variance OpenES variant.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Generate mirrored or paired perturbations around current anchors.
+    - Estimate update direction from fitness differences while monitoring estimator variance.
+    - Scale step size using variance-aware control to avoid unstable updates.
+    - Resample around the updated center.
+
+    Intuition:
+        SV-OpenES stabilizes OpenES by explicitly controlling noisy gradient estimates before committing large moves.
     """
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:

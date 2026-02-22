@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class SimpleGA(BasicStrategy):
-    """SimpleGA evolutionary strategy for GP populations.
+    """Canonical genetic algorithm with elitist selection.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Rank population and copy top elites.
+    - Sample parents from elites and create offspring via crossover and mutation.
+    - Refill population with offspring plus elite survivors.
+    - Track the best solution over generations.
+
+    Intuition:
+        SimpleGA relies on repeated recombination of fit building blocks, with mutation injecting diversity to avoid stagnation.
     """
 
     def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:

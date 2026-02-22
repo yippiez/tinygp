@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class xNES(BasicStrategy):
-    """xNES evolutionary strategy for GP populations.
+    """Exponential Natural Evolution Strategy.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample from a multivariate Gaussian parameterized by mean and transformation matrix.
+    - Compute utility-weighted natural gradients for mean, scale, and shape.
+    - Update covariance via matrix exponential parameterization for stable SPD evolution.
+    - Resample from the transformed distribution.
+
+    Intuition:
+        xNES performs principled natural-gradient steps while preserving covariance validity through exponential-map updates.
     """
 
     def __init__(self, *args, **kwargs):

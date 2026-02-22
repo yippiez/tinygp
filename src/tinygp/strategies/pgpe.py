@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class PGPE(BasicStrategy):
-    """PGPE evolutionary strategy for GP populations.
+    """Policy Gradients with Parameter-based Exploration.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Parameterize a search distribution over program parameters.
+    - Sample perturbations around the distribution mean.
+    - Estimate gradients for mean and exploration scale from fitness-weighted samples.
+    - Update both mean and variance parameters.
+
+    Intuition:
+        PGPE separates center learning from exploration-scale learning, enabling stable black-box optimization with explicit variance control.
     """
 
     def __init__(self, *args, **kwargs):

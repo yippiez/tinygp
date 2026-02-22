@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class SV_CMA_ES(BasicStrategy):
-    """SV_CMA_ES evolutionary strategy for GP populations.
+    """Step-variance controlled CMA-ES variant.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample candidates from a Gaussian search distribution.
+    - Recombine top-ranked candidates to update mean.
+    - Adapt covariance and step size with additional variance safeguards.
+    - Continue from the stabilized distribution.
+
+    Intuition:
+        Variance control mitigates premature step explosions/collapse, improving robustness on noisy or rugged objectives.
     """
 
     def __init__(self, *args, **kwargs):

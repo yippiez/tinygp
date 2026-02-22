@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class Sep_CMA_ES(BasicStrategy):
-    """Sep_CMA_ES evolutionary strategy for GP populations.
+    """Separable CMA-ES with diagonal covariance adaptation.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample candidates from a diagonal Gaussian around the current mean.
+    - Rank by fitness and update mean via weighted recombination.
+    - Adapt per-dimension variances and global step size from evolution paths.
+    - Iterate sampling from the new diagonal distribution.
+
+    Intuition:
+        By assuming weak cross-dimension correlation, Sep-CMA-ES keeps CMA-style adaptation at much lower computational cost.
     """
 
     def __init__(self, *args, **kwargs):

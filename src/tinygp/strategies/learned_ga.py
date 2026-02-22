@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class LearnedGA(BasicStrategy):
-    """LearnedGA evolutionary strategy for GP populations.
+    """Genetic algorithm with learned operator control.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Evaluate population and select parents/elites by fitness.
+    - Use learned heuristics to choose operator mix or operator parameters per generation.
+    - Generate offspring with the selected crossover/mutation policy.
+    - Form the next generation and retain best-so-far.
+
+    Intuition:
+        Learning operator scheduling adapts search behavior to problem phase, improving over static GA hyperparameters.
     """
 
     def __init__(self, *args, **kwargs):

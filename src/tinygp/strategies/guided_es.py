@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class GuidedES(BasicStrategy):
-    """GuidedES evolutionary strategy for GP populations.
+    """Guided Evolutionary Strategy with hybrid subspace guidance.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Maintain a guidance subspace from prior gradients, surrogate signals, or elite directions.
+    - Sample perturbations partly inside the guide subspace and partly in its orthogonal complement.
+    - Estimate an update from fitness-weighted perturbations.
+    - Adjust guide-vs-explore mixing and update the center.
+
+    Intuition:
+        GuidedES interpolates between pure random search and directed updates, improving sample efficiency when partial directional information exists.
     """
 
     def __init__(self, *args, **kwargs):

@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class iAMaLGaM_Full(BasicStrategy):
-    """iAMaLGaM_Full evolutionary strategy for GP populations.
+    """Full-covariance iAMaLGaM optimizer.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Fit a multivariate Gaussian to elite solutions.
+    - Update mean and full covariance with adaptive smoothing.
+    - Apply anticipated mean shift to accelerate along consistent progress directions.
+    - Sample next candidates from the updated full model.
+
+    Intuition:
+        Full covariance captures cross-parameter dependencies while anticipated shift turns repeated progress into larger informed moves.
     """
 
     def __init__(self, *args, **kwargs):

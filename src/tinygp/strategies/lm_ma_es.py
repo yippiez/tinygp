@@ -5,10 +5,16 @@ from .basic import BasicStrategyState
 
 
 class LM_MA_ES(BasicStrategy):
-    """LM_MA_ES evolutionary strategy for GP populations.
+    """Limited-memory Matrix Adaptation Evolution Strategy.
 
-    Uses the shared ask/tell loop and applies algorithm-specific updates
-    to build the next generation from evaluated fitness scores.
+    Algorithm:
+    - Sample offspring from a Gaussian parameterized by mean and low-memory adaptation state.
+    - Recombine successful steps with rank-based weights.
+    - Update mean and a compact covariance approximation using limited historical directions.
+    - Continue from the adapted low-memory distribution.
+
+    Intuition:
+        LM-MA-ES captures key covariance structure with near-linear memory/computation, making adaptation practical in higher dimensions.
     """
 
     def __init__(self, *args, **kwargs):
