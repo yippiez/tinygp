@@ -7,13 +7,6 @@ from tinygrad.tinygrad import dtypes
 from tinygrad.tinygrad.uop import Ops
 
 
-_PROTECTED_DIV_EPS = 1e-6
-_PROTECTED_LOG_EPS = 1e-6
-_EXP2_CLIP = 30.0
-_POW_EXP_CLIP = 8.0
-_POW_BASE_CLIP = 64.0
-
-
 def _b(op: Ops, left: UOp, right: UOp) -> UOp:
     return UOp(op, dtypes.float, (left, right))
 
@@ -48,62 +41,6 @@ def count_nodes(node: UOp) -> int:
 
 def sanitize(values: np.ndarray) -> np.ndarray:
     return np.nan_to_num(np.asarray(values, dtype=np.float64), nan=1e6, posinf=1e6, neginf=-1e6)
-
-
-def render_c_expr(node: UOp) -> str:
-    op_name = node.op.name
-
-    if op_name == "CONST":
-        value = float(node.arg)
-        if not np.isfinite(value):
-            if np.isnan(value):
-                return "NAN"
-            return "INFINITY" if value > 0 else "-INFINITY"
-        rounded = round(value)
-        if abs(value - rounded) < 1e-9:
-            return f"{int(rounded)}.0f"
-        return f"{value:.7g}f"
-
-    if op_name == "DEFINE_VAR":
-        return str(node.arg[0])
-
-    if op_name == "NEG":
-        return f"(-{render_c_expr(node.src[0])})"
-    if op_name == "SIN":
-        return f"sinf({render_c_expr(node.src[0])})"
-    if op_name == "LOG2":
-        arg = render_c_expr(node.src[0])
-        return f"log2f(fabsf({arg}) + {_PROTECTED_LOG_EPS:.1e}f)"
-    if op_name == "EXP2":
-        arg = render_c_expr(node.src[0])
-        return f"exp2f(fminf(fmaxf({arg}, {-_EXP2_CLIP:.1f}f), {_EXP2_CLIP:.1f}f))"
-    if op_name == "SQRT":
-        return f"sqrtf(fabsf({render_c_expr(node.src[0])}))"
-    if op_name == "RECIPROCAL":
-        arg = render_c_expr(node.src[0])
-        return f"(fabsf({arg}) > {_PROTECTED_DIV_EPS:.1e}f ? (1.0f / ({arg})) : 0.0f)"
-    if op_name == "TRUNC":
-        return f"truncf({render_c_expr(node.src[0])})"
-
-    left = render_c_expr(node.src[0])
-    right = render_c_expr(node.src[1])
-
-    if op_name == "ADD":
-        return f"({left} + {right})"
-    if op_name == "SUB":
-        return f"({left} - {right})"
-    if op_name == "MUL":
-        return f"({left} * {right})"
-    if op_name == "MAX":
-        return f"fmaxf({left}, {right})"
-    if op_name == "FDIV":
-        return f"(fabsf({right}) > {_PROTECTED_DIV_EPS:.1e}f ? ({left} / {right}) : 1.0f)"
-    if op_name == "POW":
-        base = f"fminf(fmaxf(fabsf({left}) + {_PROTECTED_LOG_EPS:.1e}f, {_PROTECTED_LOG_EPS:.1e}f), {_POW_BASE_CLIP:.1f}f)"
-        exp = f"fminf(fmaxf({right}, {-_POW_EXP_CLIP:.1f}f), {_POW_EXP_CLIP:.1f}f)"
-        return f"powf({base}, {exp})"
-
-    assert False, f"unsupported op for C rendering: {node.op}"
 
 
 def evolve_kernel(kernel_name: str, reference_kernel: UOp, x: np.ndarray, generations: int = 80) -> None:
@@ -145,8 +82,8 @@ def evolve_kernel(kernel_name: str, reference_kernel: UOp, x: np.ndarray, genera
     optimized_program = state.best_program.simplify()
     optimized_mse = float(np.mean((sanitize(eval_uop(optimized_program, x)) - sanitize(y)) ** 2))
 
-    reference_c_expr = render_c_expr(reference_kernel)
-    optimized_c_expr = render_c_expr(optimized_program)
+    reference_c_expr = reference_kernel.render(simplify=False)
+    optimized_c_expr = optimized_program.render(simplify=False)
 
     reference_nodes = count_nodes(reference_kernel)
     optimized_nodes = count_nodes(optimized_program)
@@ -165,12 +102,6 @@ def evolve_kernel(kernel_name: str, reference_kernel: UOp, x: np.ndarray, genera
     print()
 
 
-def main() -> None:
-    x = np.linspace(-1.0, 1.0, 128)
-    reference_kernel = tinygrad_reference_kernel()
-
-    evolve_kernel("tinygrad_poly_kernel", reference_kernel, x)
-
-
-if __name__ == "__main__":
-    main()
+x = np.linspace(-1.0, 1.0, 128)
+reference_kernel = tinygrad_reference_kernel()
+evolve_kernel("tinygrad_poly_kernel", reference_kernel, x)
