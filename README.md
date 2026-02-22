@@ -1,5 +1,7 @@
 # tinygp
 
+A library for genetic programming built on top of tinygrad UOps.
+
 ## Installation
 
 The current recommended way to install tinygp is from source.
@@ -24,49 +26,122 @@ python3 -m pip install git+https://github.com/yippiez/tinygp.git
 uv pip install git+https://github.com/yippiez/tinygp.git
 ```
 
-## Benchmark
+## Benchmarks
 
-tinygp includes multiple strategy backends and can be tuned for different quality/speed tradeoffs versus other GP libraries.
+tinygp includes multiple strategy backends and can be tuned for different quality/speed tradeoffs.
 
-Quick snapshot from the current benchmark run (`14` targets: `nguyen_1..8`, `koza_1..3`, `keijzer_1..3`, `generations=5`):
+Quick snapshot from the current benchmark run (`14` targets: `nguyen_1..8`, `koza_1..3`, `keijzer_1..3`, `generations=5`), currently compared against `gplearn`:
 
-- `gplearn` remains a strong quality baseline (`avg_test_mse=0.023048`) in this setup.
-- `tinygp[ASEBO]` achieves slightly better average quality (`avg_test_mse=0.022195`) while running about `5.87x` faster per iteration than `gplearn`.
-- `tinygp[Sep_CMA_ES]` gives strong speed (`6.95x` faster than `gplearn`) with competitive quality (`avg_test_mse=0.026559`).
+| Library / Strategy | Avg Test MSE (lower is better) | Speed vs gplearn (higher is better) |
+| --- | ---: | ---: |
+| `gplearn` | `0.023048` | `1.00x` |
+| `tinygp[ASEBO]` | `0.022195` | `5.87x` |
+| `tinygp[Sep_CMA_ES]` | `0.026559` | `6.95x` |
+
+The accuracy and speed varias with different configurations. Best way to find optimal strategy is to just test multiple strategies with different parameters for a given problem.
 
 For full benchmark tables, methodology, and simplify-mode comparisons, see `BENCHMARK.md`.
 
 Run all benchmarks with `uv run tinygp-benchmark --strategy all --target all --generations 5`.
 Pick a single strategy with `uv run tinygp-benchmark --strategy CMA_ES --target nguyen_1 --generations 5`.
 
-## Automatic kernel synthesis example
+## Examples
 
-`examples/automatic_kernel_synthesis.py` shows GP-based kernel optimization starting from a tinygrad-defined reference kernel.
+- `examples/automatic_kernel_synthesis.py` shows GP-based kernel optimization starting from a tinygrad-defined reference kernel.
 
-- Uses `ASEBO` (one of the stronger benchmarked strategies in this repository).
-- Optimizes a deliberately bloated kernel equivalent to `x^3 + x^2 + x`.
-- Tracks both fit and compactness via `objective = mse + 1e-4 * node_count`.
-- Prints the reference C expression, optimized C expression, and a ready-to-copy C kernel function.
+## Supported UOPs
 
-Run it with:
+tinygp evaluates a focused UOP subset to keep GP search stable, comparable, and efficient.
 
-```sh
-uv run python examples/automatic_kernel_synthesis.py
-```
+| UOP Name | Supported |
+| --- | --- |
+| `ADD` | Yes |
+| `AFTER` | No |
+| `ALLREDUCE` | No |
+| `AND` | No |
+| `ASSIGN` | No |
+| `BARRIER` | No |
+| `BINARY` | No |
+| `BIND` | No |
+| `BITCAST` | No |
+| `BUFFER` | No |
+| `BUFFERIZE` | No |
+| `BUFFER_VIEW` | No |
+| `CALL` | No |
+| `CAST` | No |
+| `CAT` | No |
+| `CMPEQ` | No |
+| `CMPLT` | No |
+| `CMPNE` | No |
+| `CONST` | Yes |
+| `CONTIGUOUS` | No |
+| `CONTIGUOUS_BACKWARD` | No |
+| `CONTRACT` | No |
+| `COPY` | No |
+| `CUSTOM` | No |
+| `CUSTOMI` | No |
+| `DEFINE_LOCAL` | No |
+| `DEFINE_REG` | No |
+| `DEFINE_VAR` | Yes |
+| `DETACH` | No |
+| `DEVICE` | No |
+| `ENCDEC` | No |
+| `END` | No |
+| `ENDIF` | No |
+| `EXP2` | Yes |
+| `EXPAND` | No |
+| `FDIV` | Yes |
+| `FLIP` | No |
+| `GEP` | No |
+| `GROUP` | No |
+| `IDIV` | No |
+| `IF` | No |
+| `INDEX` | No |
+| `INS` | No |
+| `LINEAR` | No |
+| `LOAD` | No |
+| `LOG2` | Yes |
+| `LUNIQUE` | No |
+| `MAX` | Yes |
+| `MOD` | No |
+| `MSELECT` | No |
+| `MSTACK` | No |
+| `MUL` | Yes |
+| `MULACC` | No |
+| `MULTI` | No |
+| `NEG` | Yes |
+| `NOOP` | No |
+| `OR` | No |
+| `PAD` | No |
+| `PARAM` | No |
+| `PERMUTE` | No |
+| `POW` | Yes |
+| `PROGRAM` | No |
+| `PTRCAT` | No |
+| `RANGE` | No |
+| `RECIPROCAL` | Yes |
+| `REDUCE` | No |
+| `REDUCE_AXIS` | No |
+| `RESHAPE` | No |
+| `REWRITE_ERROR` | No |
+| `SHL` | No |
+| `SHR` | No |
+| `SHRINK` | No |
+| `SIN` | Yes |
+| `SINK` | No |
+| `SOURCE` | No |
+| `SPECIAL` | No |
+| `SQRT` | Yes |
+| `STORE` | No |
+| `SUB` | Yes |
+| `THREEFRY` | No |
+| `TRUNC` | Yes |
+| `UNIQUE` | No |
+| `UNROLL` | No |
+| `VCONST` | No |
+| `VECTORIZE` | No |
+| `WHERE` | No |
+| `WMMA` | No |
+| `XOR` | No |
 
-Typical output includes lines like:
-
-```text
-tinygrad_poly_kernel strategy=ASEBO
-tinygrad_poly_kernel reference_nodes=35
-tinygrad_poly_kernel optimized_nodes=13
-tinygrad_poly_kernel node_reduction=22
-tinygrad_poly_kernel optimized_mse=0.00000000
-tinygrad_poly_kernel optimized_c_kernel=float tinygrad_poly_kernel(float x) { return ...; }
-```
-
-## Allowed GP operations
-
-- `tinygrad` UOps support many operations globally, but this project only evaluates a GP subset.
-- `eval_uop` currently supports: `CONST`, `DEFINE_VAR`, `NEG`, `SIN`, `LOG2`, `EXP2`, `SQRT`, `RECIPROCAL`, `TRUNC`, `ADD`, `SUB`, `MUL`, `MAX`, `FDIV`, `POW`.
-- First-generation populations now seed at least one instance of each supported primitive op when `population_size` is large enough.
+When `population_size` is large enough, generation 0 is seeded with at least one instance of each supported primitive op.
