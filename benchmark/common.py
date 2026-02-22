@@ -50,11 +50,11 @@ def strategy_kwargs_for(strategy_name: str, simplify_every_n: int = 0) -> dict:
 def dataset_for_target(target_name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Generate train and test datasets for a target function."""
     assert target_name in TARGET_REGISTRY, f"target must exist in TARGET_REGISTRY: {target_name}"
-    target_fn = TARGET_REGISTRY[target_name]
-    x_train = np.linspace(-1.0, 1.0, 128)
-    x_test = np.linspace(-1.0, 1.0, 256)
-    y_train = target_fn(x_train)
-    y_test = target_fn(x_test)
+    target_spec = TARGET_REGISTRY[target_name]
+    x_train = np.linspace(target_spec.train_min, target_spec.train_max, 128)
+    x_test = np.linspace(target_spec.test_min, target_spec.test_max, 256)
+    y_train = target_spec.fn(x_train)
+    y_test = target_spec.fn(x_test)
     return x_train, y_train, x_test, y_test
 
 
