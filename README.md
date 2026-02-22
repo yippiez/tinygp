@@ -39,6 +39,32 @@ For full benchmark tables, methodology, and simplify-mode comparisons, see `BENC
 Run all benchmarks with `uv run tinygp-benchmark --strategy all --target all --generations 5`.
 Pick a single strategy with `uv run tinygp-benchmark --strategy CMA_ES --target nguyen_1 --generations 5`.
 
+## Automatic kernel synthesis example
+
+`examples/automatic_kernel_synthesis.py` shows GP-based kernel optimization starting from a tinygrad-defined reference kernel.
+
+- Uses `ASEBO` (one of the stronger benchmarked strategies in this repository).
+- Optimizes a deliberately bloated kernel equivalent to `x^3 + x^2 + x`.
+- Tracks both fit and compactness via `objective = mse + 1e-4 * node_count`.
+- Prints the reference C expression, optimized C expression, and a ready-to-copy C kernel function.
+
+Run it with:
+
+```sh
+uv run python examples/automatic_kernel_synthesis.py
+```
+
+Typical output includes lines like:
+
+```text
+tinygrad_poly_kernel strategy=ASEBO
+tinygrad_poly_kernel reference_nodes=35
+tinygrad_poly_kernel optimized_nodes=13
+tinygrad_poly_kernel node_reduction=22
+tinygrad_poly_kernel optimized_mse=0.00000000
+tinygrad_poly_kernel optimized_c_kernel=float tinygrad_poly_kernel(float x) { return ...; }
+```
+
 ## Allowed GP operations
 
 - `tinygrad` UOps support many operations globally, but this project only evaluates a GP subset.
