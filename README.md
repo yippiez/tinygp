@@ -28,16 +28,16 @@ uv pip install git+https://github.com/yippiez/tinygp.git
 
 tinygp includes multiple strategy backends and can be tuned for different quality/speed tradeoffs versus other GP libraries.
 
-Quick snapshot from the current benchmark run (`nguyen_1`, `keijzer_1`):
+Quick snapshot from the current benchmark run (`14` targets: `nguyen_1..8`, `koza_1..3`, `keijzer_1..3`, `generations=5`):
 
-- `gplearn` reaches the lowest average test MSE (`0.002970`) in this setup.
-- `tinygp[ASEBO]` gets close quality (`0.004461`) while running about `7.0x` faster per iteration than `gplearn`.
-- `tinygp[SV_CMA_ES]`, `tinygp[Sep_CMA_ES]`, and `tinygp[LM_MA_ES]` also show strong speed/quality balance.
+- `gplearn` remains a strong quality baseline (`avg_test_mse=0.023048`) in this setup.
+- `tinygp[ASEBO]` achieves slightly better average quality (`avg_test_mse=0.022195`) while running about `5.87x` faster per iteration than `gplearn`.
+- `tinygp[Sep_CMA_ES]` gives strong speed (`6.95x` faster than `gplearn`) with competitive quality (`avg_test_mse=0.026559`).
 
 For full benchmark tables, methodology, and simplify-mode comparisons, see `BENCHMARK.md`.
 
-Run all benchmarks with `uv run tinygp-benchmark`.
-Pick a single strategy with `uv run tinygp-benchmark --strategy CMA_ES`.
+Run all benchmarks with `uv run tinygp-benchmark --strategy all --target all --generations 5`.
+Pick a single strategy with `uv run tinygp-benchmark --strategy CMA_ES --target nguyen_1 --generations 5`.
 
 ## Allowed GP operations
 
