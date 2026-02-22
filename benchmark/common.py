@@ -4,7 +4,6 @@ import numpy as np
 from benchmark.targets import TARGET_REGISTRY
 
 from tinygp.evaluate import eval_uop
-from tinygp.evaluate import render_uop
 from tinygp.strategies import STRATEGY_REGISTRY
 
 
@@ -99,7 +98,7 @@ def run_strategy(
 
     return (
         state.best_program,
-        render_uop(state.best_program),
+        state.best_program.render(),
         float(-state.best_fitness),
         float(np.mean(iteration_times)),
     )
