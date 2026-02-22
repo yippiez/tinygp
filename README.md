@@ -98,44 +98,44 @@ Pick a single strategy with `uv run tinygp-benchmark --strategy CMA_ES --target 
 
 ## Implemented Evolution Strategies
 
-| Strategy | Reference | Import | Example |
-| --- | --- | --- | --- |
-| Simple Evolution Strategy | Rechenberg (1978) | `SimpleES` | `Colab` |
-| OpenAI-ES | Salimans et al. (2017) | `Open_ES` | `Colab` |
-| CMA-ES | Hansen & Ostermeier (2001) | `CMA_ES` | `Colab` |
-| Sep-CMA-ES | Ros & Hansen (2008) | `Sep_CMA_ES` | `Colab` |
-| xNES | Wierstra et al. (2014) | `xNES` | `Colab` |
-| SNES | Wierstra et al. (2014) | `SNES` | `Colab` |
-| MA-ES | Bayer & Sendhoff (2017) | `MA_ES` | `Colab` |
-| LM-MA-ES | Loshchilov et al. (2017) | `LM_MA_ES` | `Colab` |
-| Rm_ES | Li & Zhang (2017) | `Rm_ES` | `Colab` |
-| PGPE | Sehnke et al. (2010) | `PGPE` | `Colab` |
-| ARS | Mania et al. (2018) | `ARS` | `Colab` |
-| ESMC | Merchant et al. (2021) | `ESMC` | `Colab` |
-| Persistent ES | Vicol et al. (2021) | `PersistentES` | `Colab` |
-| Noise-Reuse ES | Li et al. (2023) | `NoiseReuseES` | `Colab` |
-| CR-FM-NES | Nomura & Ono (2022) | `CR_FM_NES` | `Colab` |
-| Guided ES | Maheswaranathan et al. (2018) | `GuidedES` | `Colab` |
-| ASEBO | Choromanski et al. (2019) | `ASEBO` | `Colab` |
-| Discovered ES | Lange et al. (2023a) | `DiscoveredES` | `Colab` |
-| LES | Lange et al. (2023a) | `LearnedES` | `Colab` |
-| EvoTF | Lange et al. (2024) | `EvoTF_ES` | `Colab` |
-| iAMaLGaM-Full | Bosman et al. (2013) | `iAMaLGaM_Full` | `Colab` |
-| iAMaLGaM-Univariate | Bosman et al. (2013) | `iAMaLGaM_Univariate` | `Colab` |
-| Gradientless Descent | Golovin et al. (2019) | `GradientlessDescent` | `Colab` |
-| Simulated Annealing | Rasdi Rere et al. (2015) | `SimAnneal` | `Colab` |
-| Hill Climbing | Rasdi Rere et al. (2015) | `HillClimbing` | `Colab` |
-| Random Search | Bergstra & Bengio (2012) | `RandomSearch` | `Colab` |
-| SV-CMA-ES | Braun et al. (2024) | `SV_CMA_ES` | `Colab` |
-| SV-OpenAI-ES | Liu et al. (2017) | `SV_OpenES` | `Colab` |
-| Simple Genetic Algorithm | Such et al. (2017) | `SimpleGA` | `Colab` |
-| MR15-GA | Rechenberg (1978) | `MR15_GA` | `Colab` |
-| SAMR-GA | Clune et al. (2008) | `SAMR_GA` | `Colab` |
-| GESMR-GA | Kumar et al. (2022) | `GESMR_GA` | `Colab` |
-| LGA | Lange et al. (2023b) | `LearnedGA` | `Colab` |
-| Diffusion Evolution | Zhang et al. (2024) | `DiffusionEvolution` | `Colab` |
-| Differential Evolution | Storn & Price (1997) | `DifferentialEvolution` | `Colab` |
-| Particle Swarm Optimization | Kennedy & Eberhart (1995) | `PSO` | `Colab` |
+| Strategy | Reference | Code |
+| --- | --- | --- |
+| Simple Evolution Strategy | [Rechenberg (1978)](https://link.springer.com/chapter/10.1007/978-3-642-81283-5_8) | [`SimpleES`](src/tinygp/strategies/simple_es.py) |
+| OpenAI-ES | [Salimans et al. (2017)](https://arxiv.org/abs/1703.03864) | [`Open_ES`](src/tinygp/strategies/open_es.py) |
+| CMA-ES | [Hansen & Ostermeier (2001)](https://arxiv.org/abs/1604.00772) | [`CMA_ES`](src/tinygp/strategies/cma_es.py) |
+| Sep-CMA-ES | [Ros & Hansen (2008)](https://hal.inria.fr/inria-00287367/document) | [`Sep_CMA_ES`](src/tinygp/strategies/sep_cma_es.py) |
+| xNES | [Wierstra et al. (2014)](https://www.jmlr.org/papers/volume15/wierstra14a/wierstra14a.pdf) | [`xNES`](src/tinygp/strategies/xnes.py) |
+| SNES | [Wierstra et al. (2014)](https://www.jmlr.org/papers/volume15/wierstra14a/wierstra14a.pdf) | [`SNES`](src/tinygp/strategies/snes.py) |
+| MA-ES | [Bayer & Sendhoff (2017)](https://ieeexplore.ieee.org/document/7875115) | [`MA_ES`](src/tinygp/strategies/ma_es.py) |
+| LM-MA-ES | [Loshchilov et al. (2017)](https://arxiv.org/pdf/1705.06693.pdf) | [`LM_MA_ES`](src/tinygp/strategies/lm_ma_es.py) |
+| Rm_ES | [Li & Zhang (2017)](https://ieeexplore.ieee.org/document/8080257) | [`Rm_ES`](src/tinygp/strategies/rm_es.py) |
+| PGPE | [Sehnke et al. (2010)](https://link.springer.com/chapter/10.1007/978-3-540-87536-9_40) | [`PGPE`](src/tinygp/strategies/pgpe.py) |
+| ARS | [Mania et al. (2018)](https://arxiv.org/pdf/1803.07055) | [`ARS`](src/tinygp/strategies/ars.py) |
+| ESMC | [Merchant et al. (2021)](https://arxiv.org/abs/2107.09661) | [`ESMC`](src/tinygp/strategies/esmc.py) |
+| Persistent ES | [Vicol et al. (2021)](https://arxiv.org/abs/2112.13835) | [`PersistentES`](src/tinygp/strategies/persistent_es.py) |
+| Noise-Reuse ES | [Li et al. (2023)](https://arxiv.org/abs/2304.12180) | [`NoiseReuseES`](src/tinygp/strategies/noise_reuse_es.py) |
+| CR-FM-NES | [Nomura & Ono (2022)](https://arxiv.org/abs/2201.11422) | [`CR_FM_NES`](src/tinygp/strategies/cr_fm_nes.py) |
+| Guided ES | [Maheswaranathan et al. (2018)](https://arxiv.org/abs/1806.10230) | [`GuidedES`](src/tinygp/strategies/guided_es.py) |
+| ASEBO | [Choromanski et al. (2019)](https://arxiv.org/abs/1903.04268) | [`ASEBO`](src/tinygp/strategies/asebo.py) |
+| Discovered ES | [Lange et al. (2023a)](https://arxiv.org/abs/2211.11260) | [`DiscoveredES`](src/tinygp/strategies/discovered_es.py) |
+| LES | [Lange et al. (2023a)](https://arxiv.org/abs/2211.11260) | [`LearnedES`](src/tinygp/strategies/learned_es.py) |
+| EvoTF | [Lange et al. (2024)](https://arxiv.org/abs/2403.02985) | [`EvoTF_ES`](src/tinygp/strategies/evotf_es.py) |
+| iAMaLGaM-Full | [Bosman et al. (2013)](https://homepages.cwi.nl/~bosman/publications/2013_benchmarkingparameterfree.pdf) | [`iAMaLGaM_Full`](src/tinygp/strategies/iamalgam_full.py) |
+| iAMaLGaM-Univariate | [Bosman et al. (2013)](https://homepages.cwi.nl/~bosman/publications/2013_benchmarkingparameterfree.pdf) | [`iAMaLGaM_Univariate`](src/tinygp/strategies/iamalgam_univariate.py) |
+| Gradientless Descent | [Golovin et al. (2019)](https://arxiv.org/abs/1911.06317) | [`GradientlessDescent`](src/tinygp/strategies/gradientless_descent.py) |
+| Simulated Annealing | [Rasdi Rere et al. (2015)](https://www.sciencedirect.com/science/article/pii/S1877050915035759) | [`SimAnneal`](src/tinygp/strategies/sim_anneal.py) |
+| Hill Climbing | [Rasdi Rere et al. (2015)](https://www.sciencedirect.com/science/article/pii/S1877050915035759) | [`HillClimbing`](src/tinygp/strategies/hill_climbing.py) |
+| Random Search | [Bergstra & Bengio (2012)](https://www.jmlr.org/papers/volume13/bergstra12a/bergstra12a.pdf) | [`RandomSearch`](src/tinygp/strategies/random_search.py) |
+| SV-CMA-ES | [Braun et al. (2024)](https://arxiv.org/abs/2410.10390) | [`SV_CMA_ES`](src/tinygp/strategies/sv_cma_es.py) |
+| SV-OpenAI-ES | [Liu et al. (2017)](https://arxiv.org/abs/2410.10390) | [`SV_OpenES`](src/tinygp/strategies/sv_openes.py) |
+| Simple Genetic Algorithm | [Such et al. (2017)](https://arxiv.org/abs/1712.06567) | [`SimpleGA`](src/tinygp/strategies/simple_ga.py) |
+| MR15-GA | [Rechenberg (1978)](https://link.springer.com/chapter/10.1007/978-3-642-81283-5_8) | [`MR15_GA`](src/tinygp/strategies/mr15_ga.py) |
+| SAMR-GA | [Clune et al. (2008)](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1000187) | [`SAMR_GA`](src/tinygp/strategies/samr_ga.py) |
+| GESMR-GA | [Kumar et al. (2022)](https://arxiv.org/abs/2204.04817) | [`GESMR_GA`](src/tinygp/strategies/gesmr_ga.py) |
+| LGA | [Lange et al. (2023b)](https://arxiv.org/abs/2304.03995) | [`LearnedGA`](src/tinygp/strategies/learned_ga.py) |
+| Diffusion Evolution | [Zhang et al. (2024)](https://arxiv.org/pdf/2410.02543) | [`DiffusionEvolution`](src/tinygp/strategies/diffusion_evolution.py) |
+| Differential Evolution | [Storn & Price (1997)](https://link.springer.com/article/10.1023/A:1008202821328) | [`DifferentialEvolution`](src/tinygp/strategies/differential_evolution.py) |
+| Particle Swarm Optimization | [Kennedy & Eberhart (1995)](https://ieeexplore.ieee.org/document/488968) | [`PSO`](src/tinygp/strategies/pso.py) |
 
 ## Supported UOPs
 
