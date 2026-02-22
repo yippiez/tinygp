@@ -5,3 +5,4 @@
 - Use direct imports that match the repository layout.
 - Add a descriptive message string to every `assert` statement.
 - Prefer `assert` with descriptive messages over explicit exception raising for internal invariants.
+- Use `uv` for running Python commands and tests instead of calling `python3` directly.
