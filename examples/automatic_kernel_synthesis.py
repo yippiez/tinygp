@@ -1,8 +1,14 @@
 import numpy as np
-
-from tinygp.benchmark import keijzer_1, nguyen_1
 from tinygp.evaluate import eval_uop
 from tinygp.strategies import BasicStrategy
+
+
+def nguyen_1(x: np.ndarray) -> np.ndarray:
+    return x**3 + x**2 + x
+
+
+def keijzer_1(x: np.ndarray) -> np.ndarray:
+    return np.sin(x * x) * np.cos(x) - 1.0
 
 
 def evolve_target(name: str, target_fn, x: np.ndarray, generations: int = 60) -> None:

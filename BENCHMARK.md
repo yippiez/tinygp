@@ -1,6 +1,6 @@
 # Benchmark
 
-Running all strategies vs gplearn with `generations=5`, `population_size=256`, `to_k=32`, `seed=0`, and train/test grids from `examples/compare_all_vs_gplearn.py` gets the following:
+Running all strategies vs gplearn with `generations=5`, `population_size=256`, `to_k=32`, `seed=0`, and train/test grids from `benchmark/runner.py` gets the following:
 
 - Iteration count per target: `5`
 - Targets per run: `2` (`nguyen_1`, `keijzer_1`)

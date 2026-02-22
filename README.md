@@ -36,6 +36,9 @@ Quick snapshot from the current benchmark run (`nguyen_1`, `keijzer_1`):
 
 For full benchmark tables, methodology, and simplify-mode comparisons, see `BENCHMARK.md`.
 
+Run all benchmarks with `uv run tinygp-benchmark`.
+Pick a single strategy with `uv run tinygp-benchmark --strategy CMA_ES`.
+
 ## Allowed GP operations
 
 - `tinygrad` UOps support many operations globally, but this project only evaluates a GP subset.
