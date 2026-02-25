@@ -1,7 +1,7 @@
 from .ars import ARS
 from .asebo import ASEBO
 from .basic import BasicStrategy
-from .basic import BasicStrategyState
+from tinygp.definitions import StrategyState
 from .cma_es import CMA_ES
 from .cr_fm_nes import CR_FM_NES
 from .differential_evolution import DifferentialEvolution
@@ -88,7 +88,7 @@ def create_strategy(name: str, *args, **kwargs):
 
 __all__ = [
     "BasicStrategy",
-    "BasicStrategyState",
+    "StrategyState",
     "SimpleES",
     "Open_ES",
     "CMA_ES",

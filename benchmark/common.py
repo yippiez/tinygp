@@ -5,11 +5,7 @@ from benchmark.targets import TARGET_REGISTRY
 
 from tinygp.evaluate import eval_uop
 from tinygp.strategies import STRATEGY_REGISTRY
-
-
-def sanitize(values: np.ndarray) -> np.ndarray:
-    """Convert invalid numeric values into bounded finite values."""
-    return np.nan_to_num(np.asarray(values, dtype=np.float64), nan=1e6, posinf=1e6, neginf=-1e6)
+from tinygp.utils import sanitize
 
 
 def mse(y_true: np.ndarray, y_pred: np.ndarray) -> float:

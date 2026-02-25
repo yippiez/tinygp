@@ -1,16 +1,23 @@
+import random
+
 import numpy as np
 from tinygrad import UOp, dtypes
+
+from tinygp.definitions import BINARY_PRIMITIVES, StrategyState, UNARY_PRIMITIVES
+from tinygp.operations import (
+    uop_crossover,
+    uop_mutate,
+    uop_primitive_seed_programs,
+    uop_random_tree,
+    uop_safe_simplify,
+    uop_should_simplify_population,
+    uop_simplify_population,
+)
+
 from tinygrad.uop import Ops
+from tinygp.operations import uop_collect_nodes, uop_replace_subtree
 
-from .basic import BasicStrategy
-from .basic import BasicStrategyState
-from .basic import _collect_nodes
-from .basic import _replace_subtree
-from .basic import BINARY_PRIMITIVES
-from .basic import UNARY_PRIMITIVES
-
-
-class GplearnGP(BasicStrategy):
+class GplearnGP:
     """gplearn-style GP strategy with tournament and mixed genetic operators.
 
     This strategy mirrors core gplearn ideas: tournament selection,
@@ -39,18 +46,27 @@ class GplearnGP(BasicStrategy):
         parsimony_coefficient: float = 0.001,
         init_method: str = "half_and_half",
     ) -> None:
-        super().__init__(
-            population_size=population_size,
-            to_k=to_k,
-            mutation_rate=mutation_rate,
-            crossover_rate=crossover_rate,
-            max_depth=max_depth,
-            const_min=const_min,
-            const_max=const_max,
-            seed=seed,
-            maximize=maximize,
-            simplify_every_n=simplify_every_n,
-        )
+        assert population_size > 0, "population_size must be > 0"
+        assert 0 < to_k <= population_size, "to_k must be in [1, population_size]"
+        assert 0.0 <= mutation_rate <= 1.0, "mutation_rate must be in [0, 1]"
+        assert 0.0 <= crossover_rate <= 1.0, "crossover_rate must be in [0, 1]"
+        assert max_depth >= 1, "max_depth must be >= 1"
+        assert const_min <= const_max, "const_min must be <= const_max"
+        assert simplify_every_n >= 0, "simplify_every_n must be >= 0"
+
+        self.population_size = population_size
+        self.to_k = to_k
+        self.mutation_rate = mutation_rate
+        self.crossover_rate = crossover_rate
+        self.max_depth = max_depth
+        self.const_min = const_min
+        self.const_max = const_max
+        self.maximize = maximize
+        self.simplify_every_n = simplify_every_n
+        self._rng = random.Random(seed)
+        self._var_x = UOp.variable("x", float(const_min), float(const_max), dtype=dtypes.float)
+        self._unary_ops = UNARY_PRIMITIVES
+        self._binary_ops = BINARY_PRIMITIVES
 
         assert tournament_size > 0, "tournament_size must be greater than zero"
         assert 0.0 <= p_point_replace <= 1.0, "p_point_replace must be in [0, 1]"
@@ -88,7 +104,7 @@ class GplearnGP(BasicStrategy):
         self._unary_ops = UNARY_PRIMITIVES
         self._binary_ops = BINARY_PRIMITIVES
 
-    def ask(self, state: BasicStrategyState | None) -> tuple[list[UOp], BasicStrategyState]:
+    def ask(self, state: StrategyState | None) -> tuple[list[UOp], StrategyState]:
         """Return the current population to evaluate.
 
         Args:
@@ -101,13 +117,13 @@ class GplearnGP(BasicStrategy):
             AssertionError: If ``ask`` is called twice in a row without ``tell``.
         """
         if state is None:
-            seeds = self._primitive_seed_programs()
+            seeds = uop_primitive_seed_programs(self._var_x, self._unary_ops, self._binary_ops)
             assert self.population_size >= len(seeds), "population_size must be >= primitive seed count for first-generation coverage"
             population = list(seeds)
             while len(population) < self.population_size:
                 population.append(self._ramped_program(len(population)))
             self._rng.shuffle(population)
-            next_state = BasicStrategyState(
+            next_state = StrategyState(
                 generation=0,
                 phase="asked",
                 population=tuple(population),
@@ -120,12 +136,12 @@ class GplearnGP(BasicStrategy):
 
         population = state.population
         best_program = state.best_program
-        if self._should_simplify_population(state.generation):
-            population = self._simplify_population(state.population)
+        if uop_should_simplify_population(state.generation, self.simplify_every_n):
+            population = uop_simplify_population(state.population)
             if state.best_program is not None:
-                best_program = self._safe_simplify(state.best_program)
+                best_program = uop_safe_simplify(state.best_program)
 
-        next_state = BasicStrategyState(
+        next_state = StrategyState(
             generation=state.generation,
             phase="asked",
             population=population,
@@ -134,7 +150,7 @@ class GplearnGP(BasicStrategy):
         )
         return list(population), next_state
 
-    def tell(self, state: BasicStrategyState, fitness: np.ndarray) -> BasicStrategyState:
+    def tell(self, state: StrategyState, fitness: np.ndarray) -> StrategyState:
         """Update strategy state from fitness evaluations.
 
         Args:
@@ -159,7 +175,7 @@ class GplearnGP(BasicStrategy):
             neginf=-np.inf,
         )
 
-        lengths = np.array([len(_collect_nodes(program)) for program in state.population], dtype=np.float64)
+        lengths = np.array([len(uop_collect_nodes(program)) for program in state.population], dtype=np.float64)
         if self.maximize:
             penalized = normalized - self.parsimony_coefficient * lengths
             order = np.argsort(normalized)[::-1]
@@ -187,7 +203,7 @@ class GplearnGP(BasicStrategy):
             method = self._rng.random()
             if method < self._method_probs[0]:
                 donor = self._tournament_select(state.population, penalized)
-                child = self._crossover(parent, donor)
+                child = uop_crossover(parent, donor, self._rng)
             elif method < self._method_probs[1]:
                 child = self._subtree_mutation(parent)
             elif method < self._method_probs[2]:
@@ -198,7 +214,7 @@ class GplearnGP(BasicStrategy):
                 child = parent
             next_population.append(child)
 
-        return BasicStrategyState(
+        return StrategyState(
             generation=state.generation + 1,
             phase="ready",
             population=tuple(next_population),
@@ -248,17 +264,17 @@ class GplearnGP(BasicStrategy):
 
     def _subtree_mutation(self, program: UOp) -> UOp:
         donor = self._ramped_program(self._rng.randrange(self.population_size))
-        return self._crossover(program, donor)
+        return uop_crossover(program, donor, self._rng)
 
     def _hoist_mutation(self, program: UOp) -> UOp:
-        nodes = _collect_nodes(program)
+        nodes = uop_collect_nodes(program)
         target = self._rng.choice(nodes)
-        target_nodes = _collect_nodes(target)
+        target_nodes = uop_collect_nodes(target)
         hoist = self._rng.choice(target_nodes)
-        return _replace_subtree(program, target, hoist)
+        return uop_replace_subtree(program, target, hoist)
 
     def _point_mutation(self, program: UOp) -> UOp:
-        nodes = _collect_nodes(program)
+        nodes = uop_collect_nodes(program)
         targets = [node for node in nodes if self._rng.random() < self.p_point_replace]
         if not targets:
             return program
@@ -266,7 +282,7 @@ class GplearnGP(BasicStrategy):
         child = program
         for target in targets:
             replacement = self._point_replacement(target)
-            child = _replace_subtree(child, target, replacement)
+            child = uop_replace_subtree(child, target, replacement)
         return child
 
     def _point_replacement(self, node: UOp) -> UOp:

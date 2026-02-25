@@ -1,46 +1,36 @@
 import numpy as np
 from tinygp.evaluate import eval_uop
+from tinygp.operations import uop_count_nodes, uop_tensor_to_tree
 from tinygp.strategies import ASEBO
+from tinygp.utils import sanitize
 
-from tinygrad import UOp
-from tinygrad import dtypes
-from tinygrad.uop import Ops
-
-
-def _b(op: Ops, left: UOp, right: UOp) -> UOp:
-    return UOp(op, dtypes.float, (left, right))
+from tinygrad.dtype import dtypes
+from tinygrad.tensor import Tensor
+from tinygrad.uop.ops import UOp
 
 
-def tinygrad_reference_kernel() -> UOp:
+def tinygrad_reference_kernel(const_min: float = -1.0, const_max: float = 1.0) -> UOp:
     """A deliberately bloated tinygrad kernel equivalent to x^3 + x^2 + x."""
-    x = UOp.variable("x", -1.0, 1.0, dtype=dtypes.float)
-    one = UOp.const(dtypes.float, 1.0)
-    neg_one = UOp.const(dtypes.float, -1.0)
-    zero = UOp.const(dtypes.float, 0.0)
+    x = Tensor(UOp.variable("x", float(const_min), float(const_max), dtype=dtypes.float).bind(0))
+    one = Tensor(1.0)
+    neg_one = Tensor(-1.0)
+    zero = Tensor(0.0)
 
-    x_plus_one = _b(Ops.ADD, x, one)
-    x_minus_one = _b(Ops.ADD, x, neg_one)
-    x_sq = _b(Ops.MUL, x, x)
+    x_plus_one = x + one
+    x_minus_one = x + neg_one
+    x_sq = x * x
 
-    cubic_arm = _b(Ops.MUL, x, _b(Ops.MUL, x_plus_one, x_minus_one))
-    identity_x = _b(Ops.MAX, x, x)
-    base = _b(Ops.ADD, cubic_arm, x_sq)
-    base = _b(Ops.ADD, base, identity_x)
-    base = _b(Ops.ADD, base, _b(Ops.MUL, x, one))
+    cubic_arm = x * (x_plus_one * x_minus_one)
+    identity_x = x.maximum(x)
+    base = cubic_arm + x_sq
+    base = base + identity_x
+    base = base + (x * one)
 
-    cancel_1 = _b(Ops.SUB, x, x)
-    cancel_2 = _b(Ops.SUB, x_sq, x_sq)
-    noisy = _b(Ops.ADD, base, cancel_1)
-    noisy = _b(Ops.ADD, noisy, cancel_2)
-    return _b(Ops.ADD, noisy, zero)
-
-
-def count_nodes(node: UOp) -> int:
-    return 1 + sum(count_nodes(child) for child in node.src)
-
-
-def sanitize(values: np.ndarray) -> np.ndarray:
-    return np.nan_to_num(np.asarray(values, dtype=np.float64), nan=1e6, posinf=1e6, neginf=-1e6)
+    cancel_1 = x - x
+    cancel_2 = x_sq - x_sq
+    noisy = base + cancel_1
+    noisy = noisy + cancel_2
+    return uop_tensor_to_tree(noisy + zero, scalar_ranges={"x": (const_min, const_max)})
 
 
 def evolve_kernel(kernel_name: str, reference_kernel: UOp, x: np.ndarray, generations: int = 80) -> None:
@@ -64,7 +54,7 @@ def evolve_kernel(kernel_name: str, reference_kernel: UOp, x: np.ndarray, genera
         population, state = strategy.ask(state)
         preds = np.stack([eval_uop(individual, x) for individual in population], axis=0)
         mse = np.mean((sanitize(preds) - sanitize(y)) ** 2, axis=1)
-        complexity = np.asarray([count_nodes(individual) for individual in population], dtype=np.float64)
+        complexity = np.asarray([uop_count_nodes(individual) for individual in population], dtype=np.float64)
         objective = mse + complexity_weight * complexity
         fitness = -objective
 
@@ -85,8 +75,8 @@ def evolve_kernel(kernel_name: str, reference_kernel: UOp, x: np.ndarray, genera
     reference_c_expr = reference_kernel.render(simplify=False)
     optimized_c_expr = optimized_program.render(simplify=False)
 
-    reference_nodes = count_nodes(reference_kernel)
-    optimized_nodes = count_nodes(optimized_program)
+    reference_nodes = uop_count_nodes(reference_kernel)
+    optimized_nodes = uop_count_nodes(optimized_program)
     optimized_objective = optimized_mse + complexity_weight * optimized_nodes
 
     print(f"{kernel_name} strategy=ASEBO")
