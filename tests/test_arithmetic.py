@@ -5,7 +5,9 @@ from tinygp.evaluate import eval_uop
 from tinygp.strategies.basic import BasicStrategy
 
 
-def _fit_once(target_fn):
+@pytest.fixture
+def single_gp_step(target_fn):
+    """Fit a single generation using BasicStrategy and return the best program."""
     strategy = BasicStrategy(
         population_size=16,
         to_k=4,
@@ -37,8 +39,8 @@ def _fit_once(target_fn):
         ("mul", lambda x: x * 1.5),
     ],
 )
-def test_basic_strategy_finds_simple_arithmetic_exactly(name, target_fn):
-    best_program, best_fitness = _fit_once(target_fn)
+def test_basic_strategy_finds_simple_arithmetic_exactly(name, target_fn, single_gp_step):
+    best_program, best_fitness = single_gp_step
 
     x_test = np.linspace(-5.0, 5.0, 513)
     expected = target_fn(x_test)

@@ -3,25 +3,25 @@ import numpy as np
 from benchmark.common import dataset_for_target
 from benchmark.targets import TARGET_REGISTRY
 
+EXPECTED_BENCHMARK_TARGETS = {
+    "keijzer_1",
+    "keijzer_2",
+    "keijzer_3",
+    "koza_1",
+    "koza_2",
+    "koza_3",
+    "nguyen_1",
+    "nguyen_2",
+    "nguyen_3",
+    "nguyen_4",
+    "nguyen_5",
+    "nguyen_6",
+    "nguyen_7",
+    "nguyen_8",
+}
 
 def test_target_registry_has_expanded_suite() -> None:
-    expected_targets = {
-        "keijzer_1",
-        "keijzer_2",
-        "keijzer_3",
-        "koza_1",
-        "koza_2",
-        "koza_3",
-        "nguyen_1",
-        "nguyen_2",
-        "nguyen_3",
-        "nguyen_4",
-        "nguyen_5",
-        "nguyen_6",
-        "nguyen_7",
-        "nguyen_8",
-    }
-    assert expected_targets.issubset(TARGET_REGISTRY), "expanded target suite must be present in TARGET_REGISTRY"
+    assert EXPECTED_BENCHMARK_TARGETS.issubset(TARGET_REGISTRY), "expanded target suite must be present in TARGET_REGISTRY"
 
 
 def test_dataset_generation_produces_finite_values_for_all_targets() -> None:
