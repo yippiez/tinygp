@@ -2,8 +2,8 @@ from dataclasses import dataclass
 import random
 
 import numpy as np
-from tinygrad.tinygrad import UOp, dtypes
-from tinygrad.tinygrad.uop import Ops
+from tinygrad import UOp, dtypes
+from tinygrad.uop import Ops
 
 
 UNARY_PRIMITIVES: tuple[Ops, ...] = (

@@ -278,7 +278,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "numpy", specifier = ">=2.4.2" },
-    { name = "tinygrad", editable = "tinygrad" },
+    { name = "tinygrad" },
 ]
 
 [package.metadata.requires-dev]
@@ -290,59 +290,8 @@ dev = [
 [[package]]
 name = "tinygrad"
 version = "0.12.0"
-source = { editable = "tinygrad" }
-
-[package.metadata]
-requires-dist = [
-    { name = "black", marker = "extra == 'docs'" },
-    { name = "blobfile", marker = "extra == 'testing'" },
-    { name = "boto3", marker = "extra == 'testing'" },
-    { name = "bottle", marker = "extra == 'testing'" },
-    { name = "capstone", marker = "extra == 'testing'" },
-    { name = "gguf", marker = "extra == 'testing-unit'" },
-    { name = "hypothesis", marker = "extra == 'testing-minimal'", specifier = ">=6.148.9" },
-    { name = "influxdb3-python", marker = "extra == 'testing'" },
-    { name = "librosa", marker = "extra == 'testing'" },
-    { name = "markdown-callouts", marker = "extra == 'docs'" },
-    { name = "markdown-exec", extras = ["ansi"], marker = "extra == 'docs'" },
-    { name = "mkdocs", marker = "extra == 'docs'" },
-    { name = "mkdocs-material", marker = "extra == 'docs'" },
-    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'" },
-    { name = "mypy", marker = "extra == 'linting'", specifier = "==1.19.1" },
-    { name = "networkx", marker = "extra == 'testing'" },
-    { name = "nibabel", marker = "extra == 'testing'" },
-    { name = "numba", marker = "extra == 'testing'", specifier = ">=0.55" },
-    { name = "numpy", marker = "extra == 'docs'" },
-    { name = "numpy", marker = "extra == 'linting'" },
-    { name = "numpy", marker = "extra == 'testing-minimal'" },
-    { name = "onnx", marker = "extra == 'testing'", specifier = "==1.19.0" },
-    { name = "onnx2torch", marker = "extra == 'testing'" },
-    { name = "onnxruntime", marker = "extra == 'testing'" },
-    { name = "openai", marker = "extra == 'testing-unit'" },
-    { name = "opencv-python", marker = "extra == 'testing'" },
-    { name = "pandas", marker = "extra == 'testing'" },
-    { name = "pillow", marker = "extra == 'testing'" },
-    { name = "pre-commit", marker = "extra == 'linting'" },
-    { name = "pycocotools", marker = "extra == 'testing'" },
-    { name = "pylint", marker = "extra == 'linting'" },
-    { name = "pytest", marker = "extra == 'testing-minimal'" },
-    { name = "pytest-split", marker = "extra == 'testing-minimal'" },
-    { name = "pytest-timeout", marker = "extra == 'testing-minimal'" },
-    { name = "pytest-xdist", marker = "extra == 'testing-minimal'" },
-    { name = "ruff", marker = "extra == 'linting'", specifier = "==0.14.10" },
-    { name = "safetensors", marker = "extra == 'testing-unit'" },
-    { name = "sentencepiece", marker = "extra == 'testing'" },
-    { name = "tabulate", marker = "extra == 'testing-unit'" },
-    { name = "tiktoken", marker = "extra == 'testing'" },
-    { name = "tinygrad", extras = ["testing-minimal"], marker = "extra == 'testing-unit'" },
-    { name = "tinygrad", extras = ["testing-unit"], marker = "extra == 'testing'" },
-    { name = "torch", marker = "extra == 'testing-minimal'", specifier = "==2.9.1" },
-    { name = "tqdm", marker = "extra == 'testing-unit'" },
-    { name = "transformers", marker = "extra == 'testing'" },
-    { name = "triton-nightly", marker = "extra == 'triton'", specifier = ">=2.1.0.dev20231014192330" },
-    { name = "typeguard", marker = "extra == 'linting'" },
-    { name = "typing-extensions", marker = "extra == 'linting'" },
-    { name = "unicorn", marker = "extra == 'arm'" },
-    { name = "z3-solver", marker = "extra == 'testing-minimal'", specifier = "<4.15.4" },
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b2/8c/83bc0895d78d335bd3f5ceadb8a6750c1834f058a0f7e5ee763dc0d626bf/tinygrad-0.12.0.tar.gz", hash = "sha256:299cd53d9452b8689b36c7026c866b73d1e4a862ec53a8ea5bc2a412358c1bbf", size = 1761546, upload-time = "2026-01-12T17:05:09.611Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1a/1e/034a535398b1fca9e9a0ece0bc870c122c79c80866eca3ed802bfea7b0df/tinygrad-0.12.0-py3-none-any.whl", hash = "sha256:275c01961e0959579ba99c6ce1ed70a2c2f1a408ed8cfb5c4de8ad1355e66611", size = 1673238, upload-time = "2026-01-12T17:05:06.727Z" },
 ]
-provides-extras = ["arm", "triton", "linting", "testing-minimal", "testing-unit", "testing", "docs"]

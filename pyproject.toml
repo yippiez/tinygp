@@ -14,9 +14,6 @@ dependencies = [
 [project.scripts]
 tinygp-benchmark = "benchmark.runner:main"
 
-[tool.uv.sources]
-tinygrad = { path = "tinygrad", editable = true }
-
 [dependency-groups]
 dev = [
     "gplearn>=0.4.3",
@@ -25,3 +22,6 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/tinygp", "benchmark"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

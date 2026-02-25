@@ -58,9 +58,10 @@ The current recommended way to install tinygp is from source.
 ```sh
 git clone https://github.com/yippiez/tinygp.git
 cd tinygp
-# Python3 installation
-python3 -m pip install -e .
-# For uv
+
+# uv installation 
+uv sync
+# or install just the package into the active environment
 uv pip install -e .
 ```
 

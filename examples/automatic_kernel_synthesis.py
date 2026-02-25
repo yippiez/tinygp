@@ -2,9 +2,9 @@ import numpy as np
 from tinygp.evaluate import eval_uop
 from tinygp.strategies import ASEBO
 
-from tinygrad.tinygrad import UOp
-from tinygrad.tinygrad import dtypes
-from tinygrad.tinygrad.uop import Ops
+from tinygrad import UOp
+from tinygrad import dtypes
+from tinygrad.uop import Ops
 
 
 def _b(op: Ops, left: UOp, right: UOp) -> UOp:
