@@ -1,6 +1,6 @@
 # tinygp
 
-A library for genetic programming built on top of tinygrad UOps.
+tinygp is a genetic programming library designed around using tinygrads as a mean to represent programms particularly as UOP trees. It uses ask & tell API from [(Collette et al., 2013)](http://www.cmap.polytechnique.fr/~nikolaus.hansen/collette2010Chap14.pdf). UOP trees can be evolved given strategies on user defined metrics. This allows easier simplification and efficent computation of each program.
 
 ## Basic Usage
 
@@ -53,9 +53,17 @@ state.best_program, state.best_fitness
 
 The current recommended way to install tinygp is from source.
 
-### From source
+### Direct
+```bash
+# Python3 installation
+python3 -m pip install git+https://github.com/yippiez/tinygp.git
 
-```sh
+# For uv
+uv pip install git+https://github.com/yippiez/tinygp.git
+```
+
+### From source
+```bash
 git clone https://github.com/yippiez/tinygp.git
 cd tinygp
 
@@ -63,15 +71,6 @@ cd tinygp
 uv sync
 # or install just the package into the active environment
 uv pip install -e .
-```
-
-### Direct (master)
-
-```sh
-# Python3 installation
-python3 -m pip install git+https://github.com/yippiez/tinygp.git
-# For uv
-uv pip install git+https://github.com/yippiez/tinygp.git
 ```
 
 ## Benchmarks
